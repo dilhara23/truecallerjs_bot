@@ -332,58 +332,7 @@ Deno.serve(
 
     reportEvent("/search");
 
-    // Extracting and formatting the desired information from search result
-    if (searchResult.ok) {
-        const searchData = await searchResult.json();
-        const filteredData = searchData.data.map(entry => {
-            return {
-                name: entry.name,
-                birthday: entry.birthday,
-                gender: entry.gender,
-                about: entry.about,
-                jobTitle: entry.jobTitle,
-                access: entry.access,
-                e164Format: entry.e164Format,
-                numberType: entry.numberType,
-                countryCode: entry.countryCode,
-                carrier: entry.carrier,
-                address: entry.address,
-                street: entry.street,
-                zipCode: entry.zipCode,
-                city: entry.city,
-                timeZone: entry.timeZone,
-                id: entry.id,
-                caption: entry.caption
-            };
-        });
-        
-        // Format the filtered data nicely
-        let message = "Search Result:\n\n";
-        filteredData.forEach(entry => {
-            message += `Name: ${entry.name}\n`;
-            message += `Birthday: ${entry.birthday}\n`;
-            message += `Gender: ${entry.gender}\n`;
-            message += `About: ${entry.about}\n`;
-            message += `Job Title: ${entry.jobTitle}\n`;
-            message += `Access: ${entry.access}\n`;
-            message += `E164 Format: ${entry.e164Format}\n`;
-            message += `Number Type: ${entry.numberType}\n`;
-            message += `Country Code: ${entry.countryCode}\n`;
-            message += `Carrier: ${entry.carrier}\n`;
-            message += `Address: ${entry.address}\n`;
-            message += `Street: ${entry.street}\n`;
-            message += `Zip Code: ${entry.zipCode}\n`;
-            message += `City: ${entry.city}\n`;
-            message += `Time Zone: ${entry.timeZone}\n`;
-            message += `ID: ${entry.id}\n`;
-            message += `Caption: ${entry.caption}\n\n`;
-        });
-
-        return sendTgMessage(message);
-    } else {
-        // Handle the case where search result is not ok
-        return sendTgMessage("Error occurred while searching for the number.");
-    }
+    return sendTgMessage(JSON.stringify(searchResult));
   },
 );
 
