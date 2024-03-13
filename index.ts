@@ -332,7 +332,7 @@ Deno.serve(
 
     reportEvent("/search");
 
-    return sendTgMessage(JSON.stringify(searchResult, null, 2));
+    return sendTgMessage("```json\n" + JSON.stringify(searchResult, null, 2) + "\n```");
   },
 );
 
