@@ -310,30 +310,38 @@ Deno.serve(
       installationId: kvValue.installationId,
     };
 
-    const searchResult = await search(searchData);
+const searchResult = await search(searchData);
 
-    // TruecallerJS wraps the Axios error instead of throwing it:
-    // https://github.com/sumithemmadi/truecallerjs/blob/4a89a9ed71429900f60653291de4c64cc8fd50ab/src/search.ts#L204
-    if (searchResult.json() instanceof Error) {
-      // deno-lint-ignore no-explicit-any
-      const error = searchResult.json() as any;
-      const { status = "", message: apiMessage = "" } =
-        error.response?.data ?? {};
+// TruecallerJS wraps the Axios error instead of throwing it:
+// https://github.com/sumithemmadi/truecallerjs/blob/4a89a9ed71429900f60653291de4c64cc8fd50ab/src/search.ts#L204
+if (searchResult.json() instanceof Error) {
+  // deno-lint-ignore no-explicit-any
+  const error = searchResult.json() as any;
+  const { status = "", message: apiMessage = "" } =
+    error.response?.data ?? {};
 
-      if (status === 40101 || status === 42601) {
-        return sendTgMessage(
-          `Truecaller responded with an account error: \`${apiMessage}\`\\.\n\nMake sure your account is still valid by login into the official app\\.\n\nTry to /login here again after checking\\.`,
-          true,
-        );
-      }
+  if (status === 40101 || status === 42601) {
+    return sendTgMessage(
+      `Truecaller responded with an account error: \`${apiMessage}\`\\.\n\nMake sure your account is still valid by login into the official app\\.\n\nTry to /login here again after checking\\.`,
+      true,
+    );
+  }
 
-      throw searchResult.json();
-    }
+  throw searchResult.json();
+}
 
-    reportEvent("/search");
+reportEvent("/search");
 
-    return sendTgMessage(searchResult.getName());
-  },
+const name = searchResult.name || "N/A";
+const birthday = searchResult.birthday || "N/A";
+const gender = searchResult.gender || "N/A";
+const about = searchResult.about || "N/A";
+const access = searchResult.access || "N/A";
+
+const message = `Name: ${name}\nBirthday: ${birthday}\nGender: ${gender}\nAbout: ${about}\nAccess: ${access}`;
+
+return sendTgMessage(message);
+},
 );
 
 function sendTgMessage(text: string, formatted = false) {
@@ -352,6 +360,7 @@ function sendTgMessage(text: string, formatted = false) {
     },
   );
 }
+
 
 function sendTypingIndicator(): void {
   fetch(
