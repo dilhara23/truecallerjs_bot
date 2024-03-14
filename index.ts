@@ -336,14 +336,18 @@ Deno.serve(
   },
 );
 
-function sendTgMessage(text: string, formatted = false) {
+function sendTgMessage(text, formatted = true) {
+  let formattedText = text;
+  if (formatted) {
+    formattedText = JSON.stringify(JSON.parse(text), null, 2);
+  }
   return new Response(
     JSON.stringify({
       method: "sendMessage",
       chat_id: tgChatId!,
       parse_mode: formatted ? "MarkdownV2" : undefined,
       disable_web_page_preview: true,
-      text,
+      text: formattedText,
     } satisfies BotParams<"sendMessage">),
     {
       headers: {
