@@ -332,44 +332,18 @@ Deno.serve(
 
     reportEvent("/search");
 
-    sendFullJsonResult(searchResult);
+    return sendTgMessage(searchResult.getName());
   },
 );
 
-function sendTgMessage(fullJsonResult) {
-  // Parse the full JSON result
-  const searchResult = JSON.parse(fullJsonResult);
-
-  // Extract the required values
-  const {
-    name,
-    birthday,
-    gender,
-    about,
-    job_title: jobTitle,
-    access,
-    company_name: companyName,
-    phone_number: phoneNumber,
-    number_type: numberType,
-    carrier,
-    address,
-    street,
-    zip_code: zipCode,
-    city,
-    country_code: countryCode,
-    id,
-    caption
-  } = searchResult;
-
-  // Construct the message
-  const message = `Name: ${name}\nBirthday: ${birthday}\nGender: ${gender}\nAbout: ${about}\nJob Title: ${jobTitle}\nAccess: ${access}\nCompany Name: ${companyName}\nPhone Number: ${phoneNumber}\nNumber Type: ${numberType}\nCarrier: ${carrier}\nAddress: ${address}\nStreet: ${street}\nZip Code: ${zipCode}\nCity: ${city}\nCountry Code: ${countryCode}\nId: ${id}\nCaption: ${caption}`;
-
-  // Return the message
+function sendTgMessage(text: string, formatted = false) {
   return new Response(
     JSON.stringify({
       method: "sendMessage",
       chat_id: tgChatId!,
-      text: message,
+      parse_mode: formatted ? "MarkdownV2" : undefined,
+      disable_web_page_preview: true,
+      text,
     } satisfies BotParams<"sendMessage">),
     {
       headers: {
@@ -378,7 +352,6 @@ function sendTgMessage(fullJsonResult) {
     },
   );
 }
-
 
 function sendTypingIndicator(): void {
   fetch(
