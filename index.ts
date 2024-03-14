@@ -334,25 +334,31 @@ Deno.serve(
 );
 
 function sendTgMessage(searchResult: any) {
-  const formattedMessage = `
-👨‍💼 Name: ${searchResult.getName()}
-🎂 Birthday: ${searchResult.getBirthday()}
-👨 Gender: ${searchResult.getGender()}
-📚 About: ${searchResult.getAbout()}
-💼 Job Title: ${searchResult.getJobTitle()}
-🔓 Access: ${searchResult.getAccess()}
-🏢 Company Name: ${searchResult.getCompanyName()}
-📞 Phone Number: ${searchResult.getPhoneNumber()}
-📱 Number Type: ${searchResult.getNumberType()}
-📡 Carrier: ${searchResult.getCarrier()}
-🏠 Address: ${searchResult.getAddress()}
-🛣️ Street: ${searchResult.getStreet()}
-🔢 Zip Code: ${searchResult.getZipCode()}
-🏙️ City: ${searchResult.getCity()}
-🇱🇰 Country Code: ${searchResult.getCountryCode()}
-🆔 Id: ${searchResult.getId()}
-📝 Caption: ${searchResult.getCaption()}
+  let formattedMessage = '';
+
+  if (typeof searchResult === 'object' && searchResult !== null) {
+    formattedMessage = `
+👨‍💼 Name: ${searchResult.name ?? 'N/A'}
+🎂 Birthday: ${searchResult.birthday ?? 'N/A'}
+👨 Gender: ${searchResult.gender ?? 'N/A'}
+📚 About: ${searchResult.about ?? 'N/A'}
+💼 Job Title: ${searchResult.jobTitle ?? 'N/A'}
+🔓 Access: ${searchResult.access ?? 'N/A'}
+🏢 Company Name: ${searchResult.companyName ?? 'N/A'}
+📞 Phone Number: ${searchResult.phoneNumber ?? 'N/A'}
+📱 Number Type: ${searchResult.numberType ?? 'N/A'}
+📡 Carrier: ${searchResult.carrier ?? 'N/A'}
+🏠 Address: ${searchResult.address ?? 'N/A'}
+🛣️ Street: ${searchResult.street ?? 'N/A'}
+🔢 Zip Code: ${searchResult.zipCode ?? 'N/A'}
+🏙️ City: ${searchResult.city ?? 'N/A'}
+🇱🇰 Country Code: ${searchResult.countryCode ?? 'N/A'}
+🆔 Id: ${searchResult.id ?? 'N/A'}
+📝 Caption: ${searchResult.caption ?? 'N/A'}
 `;
+  } else {
+    formattedMessage = "Error: Unable to retrieve search results.";
+  }
 
   return new Response(
     JSON.stringify({
