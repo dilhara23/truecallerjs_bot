@@ -312,10 +312,7 @@ Deno.serve(
 
     const searchResult = await search(searchData);
 
-    // TruecallerJS wraps the Axios error instead of throwing it:
-    // https://github.com/sumithemmadi/truecallerjs/blob/4a89a9ed71429900f60653291de4c64cc8fd50ab/src/search.ts#L204
     if (searchResult.json() instanceof Error) {
-      // deno-lint-ignore no-explicit-any
       const error = searchResult.json() as any;
       const { status = "", message: apiMessage = "" } =
         error.response?.data ?? {};
@@ -332,24 +329,44 @@ Deno.serve(
 
     reportEvent("/search");
 
-    return sendTgMessage("```json\n" + JSON.stringify(searchResult, null, 2) + "\n```");
+    return sendTgMessage(searchResult);
   },
 );
 
-function sendTgMessage(text: string, formatted = false) {
+function sendTgMessage(searchResult: any) {
+  const formattedMessage = `
+👨‍💼 Name: ${searchResult.getName()}
+🎂 Birthday: ${searchResult.getBirthday()}
+👨 Gender: ${searchResult.getGender()}
+📚 About: ${searchResult.getAbout()}
+💼 Job Title: ${searchResult.getJobTitle()}
+🔓 Access: ${searchResult.getAccess()}
+🏢 Company Name: ${searchResult.getCompanyName()}
+📞 Phone Number: ${searchResult.getPhoneNumber()}
+📱 Number Type: ${searchResult.getNumberType()}
+📡 Carrier: ${searchResult.getCarrier()}
+🏠 Address: ${searchResult.getAddress()}
+🛣️ Street: ${searchResult.getStreet()}
+🔢 Zip Code: ${searchResult.getZipCode()}
+🏙️ City: ${searchResult.getCity()}
+🇱🇰 Country Code: ${searchResult.getCountryCode()}
+🆔 Id: ${searchResult.getId()}
+📝 Caption: ${searchResult.getCaption()}
+`;
+
   return new Response(
     JSON.stringify({
       method: "sendMessage",
       chat_id: tgChatId!,
-      parse_mode: formatted ? "MarkdownV2" : undefined,
+      parse_mode: "MarkdownV2",
       disable_web_page_preview: true,
-      text,
-    } satisfies BotParams<"sendMessage">),
+      text: formattedMessage,
+    }),
     {
       headers: {
         "Content-Type": "application/json",
       },
-    },
+    }
   );
 }
 
