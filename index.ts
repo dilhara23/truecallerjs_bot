@@ -312,7 +312,10 @@ Deno.serve(
 
     const searchResult = await search(searchData);
 
+    // TruecallerJS wraps the Axios error instead of throwing it:
+    // https://github.com/sumithemmadi/truecallerjs/blob/4a89a9ed71429900f60653291de4c64cc8fd50ab/src/search.ts#L204
     if (searchResult.json() instanceof Error) {
+      // deno-lint-ignore no-explicit-any
       const error = searchResult.json() as any;
       const { status = "", message: apiMessage = "" } =
         error.response?.data ?? {};
@@ -329,62 +332,53 @@ Deno.serve(
 
     reportEvent("/search");
 
-    return sendTgMessage(searchResult);
+    sendFullJsonResult(searchResult);
   },
 );
 
-function sendTgMessage(searchResult: any) {
-  if (searchResult && typeof searchResult === 'object') {
-    const formattedMessage = `
-👨‍💼 Name: ${searchResult.name || 'N/A'}
-🎂 Birthday: ${searchResult.birthday || 'N/A'}
-👨 Gender: ${searchResult.gender || 'N/A'}
-📚 About: ${searchResult.about || 'N/A'}
-💼 Job Title: ${searchResult.jobTitle || 'N/A'}
-🔓 Access: ${searchResult.access || 'N/A'}
-🏢 Company Name: ${searchResult.companyName || 'N/A'}
-📞 Phone Number: ${searchResult.phoneNumber || 'N/A'}
-📱 Number Type: ${searchResult.numberType || 'N/A'}
-📡 Carrier: ${searchResult.carrier || 'N/A'}
-🏠 Address: ${searchResult.address || 'N/A'}
-🛣️ Street: ${searchResult.street || 'N/A'}
-🔢 Zip Code: ${searchResult.zipCode || 'N/A'}
-🏙️ City: ${searchResult.city || 'N/A'}
-🇱🇰 Country Code: ${searchResult.countryCode || 'N/A'}
-🆔 Id: ${searchResult.id || 'N/A'}
-📝 Caption: ${searchResult.caption || 'N/A'}
-`;
-    return new Response(
-      JSON.stringify({
-        method: "sendMessage",
-        chat_id: tgChatId!,
-        parse_mode: "MarkdownV2",
-        disable_web_page_preview: true,
-        text: formattedMessage,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  } else {
-    return new Response(
-      JSON.stringify({
-        method: "sendMessage",
-        chat_id: tgChatId!,
-        parse_mode: "MarkdownV2",
-        disable_web_page_preview: true,
-        text: "Error: Unable to retrieve search results.",
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  }
+function sendTgMessage(fullJsonResult) {
+  // Parse the full JSON result
+  const searchResult = JSON.parse(fullJsonResult);
+
+  // Extract the required values
+  const {
+    name,
+    birthday,
+    gender,
+    about,
+    job_title: jobTitle,
+    access,
+    company_name: companyName,
+    phone_number: phoneNumber,
+    number_type: numberType,
+    carrier,
+    address,
+    street,
+    zip_code: zipCode,
+    city,
+    country_code: countryCode,
+    id,
+    caption
+  } = searchResult;
+
+  // Construct the message
+  const message = `Name: ${name}\nBirthday: ${birthday}\nGender: ${gender}\nAbout: ${about}\nJob Title: ${jobTitle}\nAccess: ${access}\nCompany Name: ${companyName}\nPhone Number: ${phoneNumber}\nNumber Type: ${numberType}\nCarrier: ${carrier}\nAddress: ${address}\nStreet: ${street}\nZip Code: ${zipCode}\nCity: ${city}\nCountry Code: ${countryCode}\nId: ${id}\nCaption: ${caption}`;
+
+  // Return the message
+  return new Response(
+    JSON.stringify({
+      method: "sendMessage",
+      chat_id: tgChatId!,
+      text: message,
+    } satisfies BotParams<"sendMessage">),
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
 }
+
 
 function sendTypingIndicator(): void {
   fetch(
