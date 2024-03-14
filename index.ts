@@ -332,38 +332,18 @@ Deno.serve(
 
     reportEvent("/search");
 
-    return sendTgMessage(JSON.stringify(searchResult));
+    return sendTgMessage(searchResult.getName());
   },
 );
 
-function sendTgMessage(text, formatted = false) {
-  let formattedText = text;
-  if (formatted) {
-    try {
-      formattedText = JSON.stringify(JSON.parse(text), null, 2);
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      return new Response(
-        JSON.stringify({
-          method: "sendMessage",
-          chat_id: tgChatId!,
-          text: "Error: Failed to parse JSON response",
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-  }
+function sendTgMessage(text: string, formatted = false) {
   return new Response(
     JSON.stringify({
       method: "sendMessage",
       chat_id: tgChatId!,
       parse_mode: formatted ? "MarkdownV2" : undefined,
       disable_web_page_preview: true,
-      text: formattedText,
+      text,
     } satisfies BotParams<"sendMessage">),
     {
       headers: {
@@ -463,4 +443,4 @@ function reportEvent(eventName: BotCommand): void {
       },
     }),
   }).catch(reportError);
-}
+  }
