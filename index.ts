@@ -343,8 +343,8 @@ function sendTgMessage(text: string, formatted = false) {
       chat_id: tgChatId!,
       parse_mode: formatted ? "MarkdownV2" : undefined,
       disable_web_page_preview: true,
-      text,
-    } satisfies BotParams<"sendMessage">),
+      text: text, // Modify this line to send the full result
+    } as BotParams<"sendMessage">),
     {
       headers: {
         "Content-Type": "application/json",
