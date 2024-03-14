@@ -332,9 +332,7 @@ Deno.serve(
 
     reportEvent("/search");
 
-    // Instead of just returning the name, return the entire search result
     return sendTgMessage(JSON.stringify(searchResult), true);
-
   },
 );
 
