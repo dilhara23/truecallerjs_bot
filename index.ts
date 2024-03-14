@@ -304,35 +304,38 @@ Deno.serve(
       return sendTgMessage("Please /login first before searching for a number");
     }
 
+        // Inside the Deno.serve block
     const searchData = {
       number: message.text,
       countryCode: kvValue.countryCode,
       installationId: kvValue.installationId,
     };
-
+    
     const searchResult = await search(searchData);
-
+    
     // TruecallerJS wraps the Axios error instead of throwing it:
     // https://github.com/sumithemmadi/truecallerjs/blob/4a89a9ed71429900f60653291de4c64cc8fd50ab/src/search.ts#L204
-    if (searchResult.json() instanceof Error) {
-      // deno-lint-ignore no-explicit-any
-      const error = searchResult.json() as any;
+    if (searchResult instanceof Error) {
+      // Handle error
+      const error = searchResult;
       const { status = "", message: apiMessage = "" } =
-        error.response?.data ?? {};
-
+        error.response?.data ?? {};=
+    
       if (status === 40101 || status === 42601) {
         return sendTgMessage(
           `Truecaller responded with an account error: \`${apiMessage}\`\\.\n\nMake sure your account is still valid by login into the official app\\.\n\nTry to /login here again after checking\\.`,
           true,
         );
       }
-
-      throw searchResult.json();
+    
+      throw searchResult;
     }
-
+    
     reportEvent("/search");
+    
+    // Send the full JSON result back to the Telegram chat
+    return sendTgMessage(JSON.stringify(searchResult), true);
 
-    return sendTgMessage(searchResult.getName());
   },
 );
 
@@ -443,4 +446,4 @@ function reportEvent(eventName: BotCommand): void {
       },
     }),
   }).catch(reportError);
-  }
+}
