@@ -334,46 +334,56 @@ Deno.serve(
 );
 
 function sendTgMessage(searchResult: any) {
-  let formattedMessage = '';
-
-  if (typeof searchResult === 'object' && searchResult !== null) {
-    formattedMessage = `
-👨‍💼 Name: ${searchResult.name ?? 'N/A'}
-🎂 Birthday: ${searchResult.birthday ?? 'N/A'}
-👨 Gender: ${searchResult.gender ?? 'N/A'}
-📚 About: ${searchResult.about ?? 'N/A'}
-💼 Job Title: ${searchResult.jobTitle ?? 'N/A'}
-🔓 Access: ${searchResult.access ?? 'N/A'}
-🏢 Company Name: ${searchResult.companyName ?? 'N/A'}
-📞 Phone Number: ${searchResult.phoneNumber ?? 'N/A'}
-📱 Number Type: ${searchResult.numberType ?? 'N/A'}
-📡 Carrier: ${searchResult.carrier ?? 'N/A'}
-🏠 Address: ${searchResult.address ?? 'N/A'}
-🛣️ Street: ${searchResult.street ?? 'N/A'}
-🔢 Zip Code: ${searchResult.zipCode ?? 'N/A'}
-🏙️ City: ${searchResult.city ?? 'N/A'}
-🇱🇰 Country Code: ${searchResult.countryCode ?? 'N/A'}
-🆔 Id: ${searchResult.id ?? 'N/A'}
-📝 Caption: ${searchResult.caption ?? 'N/A'}
+  if (searchResult && typeof searchResult === 'object') {
+    const formattedMessage = `
+👨‍💼 Name: ${searchResult.name || 'N/A'}
+🎂 Birthday: ${searchResult.birthday || 'N/A'}
+👨 Gender: ${searchResult.gender || 'N/A'}
+📚 About: ${searchResult.about || 'N/A'}
+💼 Job Title: ${searchResult.jobTitle || 'N/A'}
+🔓 Access: ${searchResult.access || 'N/A'}
+🏢 Company Name: ${searchResult.companyName || 'N/A'}
+📞 Phone Number: ${searchResult.phoneNumber || 'N/A'}
+📱 Number Type: ${searchResult.numberType || 'N/A'}
+📡 Carrier: ${searchResult.carrier || 'N/A'}
+🏠 Address: ${searchResult.address || 'N/A'}
+🛣️ Street: ${searchResult.street || 'N/A'}
+🔢 Zip Code: ${searchResult.zipCode || 'N/A'}
+🏙️ City: ${searchResult.city || 'N/A'}
+🇱🇰 Country Code: ${searchResult.countryCode || 'N/A'}
+🆔 Id: ${searchResult.id || 'N/A'}
+📝 Caption: ${searchResult.caption || 'N/A'}
 `;
+    return new Response(
+      JSON.stringify({
+        method: "sendMessage",
+        chat_id: tgChatId!,
+        parse_mode: "MarkdownV2",
+        disable_web_page_preview: true,
+        text: formattedMessage,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } else {
-    formattedMessage = "Error: Unable to retrieve search results.";
+    return new Response(
+      JSON.stringify({
+        method: "sendMessage",
+        chat_id: tgChatId!,
+        parse_mode: "MarkdownV2",
+        disable_web_page_preview: true,
+        text: "Error: Unable to retrieve search results.",
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
-
-  return new Response(
-    JSON.stringify({
-      method: "sendMessage",
-      chat_id: tgChatId!,
-      parse_mode: "MarkdownV2",
-      disable_web_page_preview: true,
-      text: formattedMessage,
-    }),
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
 }
 
 function sendTypingIndicator(): void {
