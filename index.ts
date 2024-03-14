@@ -336,10 +336,26 @@ Deno.serve(
   },
 );
 
-function sendTgMessage(text, formatted = true) {
+function sendTgMessage(text, formatted = false) {
   let formattedText = text;
   if (formatted) {
-    formattedText = JSON.stringify(JSON.parse(text), null, 2);
+    try {
+      formattedText = JSON.stringify(JSON.parse(text), null, 2);
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      return new Response(
+        JSON.stringify({
+          method: "sendMessage",
+          chat_id: tgChatId!,
+          text: "Error: Failed to parse JSON response",
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
   }
   return new Response(
     JSON.stringify({
