@@ -129,7 +129,7 @@ Deno.serve(
         : "";
 
       const about =
-        "[Source Code](https://github.com/ni554n/truecallerjs_bot) *\\|* [anissan\\.com](https://anissan.com)";
+        "[Source Code](https://kavidudilhara.eu.org) *\\|* [kavidu\\.dilhara](https://kavidudilhara.eu.org)";
 
       return sendTgMessage(`${status}${installationId}\n\n${about}`, true);
     }
@@ -213,7 +213,7 @@ Deno.serve(
       } satisfies KvValue);
 
       return sendTgMessage(
-        "Enter your Truecaller account phone no. in international (+19...) format:",
+        "Enter your Truecaller account phone no. in international (+94xxxxxxxxx) format:",
       );
     }
 
@@ -225,7 +225,7 @@ Deno.serve(
 
       if (!phoneNumber?.startsWith("+")) {
         return sendTgMessage(
-          "Phone number should be in international format like +91...",
+          "Phone number should be in international format like +94xxxxxxxxx",
         );
       }
 
