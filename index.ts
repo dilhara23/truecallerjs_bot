@@ -361,26 +361,42 @@ function sendTgMessage(text: string, formatted = false) {
   );
 }
 
-function sendTypingIndicator(): void {
-  fetch(
-    `https://api.telegram.org/bot${Deno.env.get(
-      "TG_THIS_BOT_TOKEN",
-    )}/sendChatAction`,
+async function sendTypingIndicator(chatId: number, channelId?: string): Promise<void> {
+  const typingResponse = fetch(
+    `https://api.telegram.org/bot${Deno.env.get("TG_THIS_BOT_TOKEN")}/sendChatAction`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: tgChatId,
+        chat_id: chatId,
         action: "typing",
       }),
     },
-  ).catch(console.error);
+  );
+  
+  // Send typing indicator to specified channel if channelId is provided
+  if (channelId) {
+    await fetch(
+      `https://api.telegram.org/bot${Deno.env.get("TG_THIS_BOT_TOKEN")}/sendChatAction`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: channelId,
+          action: "typing",
+        }),
+      },
+    ).catch(console.error);
+  }
+
+  await typingResponse.catch(console.error);
 }
 
-// Completely optional. Just for me to error logging and debugging.
-function reportError(error: Error): void {
+async function reportError(error: Error, chatId: number, channelId?: string): Promise<void> {
   const TG_REPORT_CHANNEL_ID = Deno.env.get("TG_REPORT_CHANNEL_ID");
 
   if (!TG_REPORT_CHANNEL_ID) {
@@ -391,7 +407,6 @@ function reportError(error: Error): void {
   let details: string;
 
   if (error.name === "AxiosError" && "response" in error) {
-    // deno-lint-ignore no-explicit-any
     const { config = {}, data = {} } = error.response as any;
 
     const url = config.url ?? "";
@@ -404,28 +419,26 @@ function reportError(error: Error): void {
     details = `${error.stack}`;
   }
 
-  // Telegram formatting rule:
-  // https://core.telegram.org/bots/api#markdownv2-style
-  details = `${tgChatId}: ${error.message}\n\n${details}`
+  details = `${chatId}: ${error.message}\n\n${details}`
     .replaceAll("\\", "\\\\")
     .replaceAll("`", "\\`");
 
-  fetch(
-    `https://api.telegram.org/bot${Deno.env.get(
-      "TG_THIS_BOT_TOKEN",
-    )}/sendMessage`,
+  const response = await fetch(
+    `https://api.telegram.org/bot${Deno.env.get("TG_THIS_BOT_TOKEN")}/sendMessage`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: TG_REPORT_CHANNEL_ID,
+        chat_id: channelId ?? TG_REPORT_CHANNEL_ID,
         parse_mode: "MarkdownV2",
         text: `${"```"}\n${details}\n${"```"}`,
       }),
     },
   ).catch(console.error);
+
+  await response?.catch(console.error);
 }
 
 function reportEvent(eventName: BotCommand): void {
